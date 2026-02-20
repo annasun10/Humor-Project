@@ -1,44 +1,28 @@
 // lib/votes.ts
-import { supabase } from './supabaseClient';
-
-export type VoteResult = { ok: true } | { ok: false; error: string };
-
-// voteValue: 1 (upvote), -1 (downvote), 0 (remove)
-export async function submitVote(captionId: string, voteValue: number): Promise<VoteResult> {
-  // ensure user is signed in:
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return { ok: false, error: 'not_authenticated' };
+// client-side helper that calls your server-side /api/vote endpoint
+export async function submitVote(captionId: string, voteValue: number) {
+  console.log('submitVote called', { captionId, voteValue });
 
   try {
-    if (voteValue === 0) {
-      // remove vote
-      const { error } = await supabase
-        .from('caption_votes')
-        .delete()
-        .match({ caption_id: captionId, profile_id: user.id });
+    const res = await fetch('/api/vote', {
+      method: 'POST',
+      credentials: 'same-origin', // <--- THIS ENSURES THE BROWSER SENDS COOKIES
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ captionId, vote: voteValue }),
+    });
 
-      if (error) throw error;
-      return { ok: true };
-    } else {
-      // upsert (insert or update) using schema column names:
-      const payload = {
-        caption_id: captionId,
-        profile_id: user.id,
-        vote_value: voteValue,
-        modified_datetime_utc: new Date().toISOString(),
-      };
+    console.log('fetch completed, status:', res.status);
 
-      const { error } = await supabase
-        .from('caption_votes')
-        .upsert(payload, { onConflict: 'caption_id,profile_id' });
+    // try to parse JSON response
+    const json = await res.json().catch(() => ({}));
+    console.log('fetch response json:', json);
 
-      if (error) throw error;
-      return { ok: true };
+    if (!res.ok) {
+      return { ok: false, error: json?.error ?? res.statusText };
     }
-  } catch (e: any) {
-    return { ok: false, error: e.message ?? String(e) };
+    return { ok: true };
+  } catch (err: any) {
+    console.error('submitVote network error', err);
+    return { ok: false, error: err?.message ?? 'network_error' };
   }
 }
