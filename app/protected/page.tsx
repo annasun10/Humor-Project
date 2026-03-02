@@ -146,10 +146,10 @@ export default async function ProtectedPage() {
         <CaptionPlayer items={items} datasetKey={items.map(i => i.id).join('-')} />
 
         {/* --- TEMP DEBUG TOOL (STEP 1 TEST) --- */}
-        <div className="bg-white border rounded-xl p-4 shadow">
+        {/* <div className="bg-white border rounded-xl p-4 shadow">
           <h2 className="font-semibold mb-2">API Test</h2>
           <ImageUploadTester />
-        </div>
+        </div> */}
       </main>
     </div>
   );
