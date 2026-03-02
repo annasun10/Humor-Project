@@ -8,6 +8,7 @@ type Props = {
   captionId: string; // uuid
   initialScore?: number | null;
   initialUserVote?: number | null; // 1, -1, or null
+  content?: string | null;
 };
 
 export default function CaptionVoting({

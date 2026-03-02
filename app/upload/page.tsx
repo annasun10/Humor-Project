@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import SignOutButton from "@/app/ui/SignOutButton";
-import UploadAndVote from "@/app/ui/UploadAndVote";
+import UploadAndVote from "../ui/UploadAndVote";
 import Header from "@/app/ui/Header";
 
 export default async function UploadPage() {
