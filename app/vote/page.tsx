@@ -1,20 +1,18 @@
-// app/protected/page.tsx
+// app/vote/page.tsx
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import SignOutButton from "@/app/ui/SignOutButton";
 import CaptionPlayer from "@/app/ui/CaptionPlayer";
-import ImageUploadTester from "@/app/ui/ImageUploadTester";
 import Header from "@/app/ui/Header";
 
-export default async function ProtectedPage() {
+export default async function VotePage() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
-
   if (!data.user) redirect("/login");
 
   const user = data.user;
 
-  // -------- fetch captions --------
+  // fetch captions
   const { data: captions } = await supabase
     .from("captions")
     .select("id, content, image_id, created_datetime_utc")
@@ -22,33 +20,33 @@ export default async function ProtectedPage() {
 
   const captionRows = captions ?? [];
 
-  // -------- fetch images (normalize common url fields) --------
+  // fetch images referenced by captions (normalize url fields)
   const imageIds = captionRows.map((c) => c.image_id).filter(Boolean);
 
   let imageMap = new Map<string, string | null>();
   if (imageIds.length) {
     const { data: imagesRows, error: imagesErr } = await supabase
       .from("images")
-      .select("id, url")   // <-- only 'url'
+      .select("id, url")    // <-- only select the real column 'url'
       .in("id", imageIds);
 
     if (imagesErr) {
       console.warn("images fetch error:", imagesErr);
     } else {
       for (const img of imagesRows ?? []) {
+        // use the 'url' column (exists) and normalize id key
         imageMap.set(String(img.id).toLowerCase(), (img as any).url ?? null);
       }
     }
   }
 
-  //   // -------- fetch images (normalize common url fields) --------
+  // // fetch images referenced by captions (normalize url fields)
   // const imageIds = captionRows.map((c) => c.image_id).filter(Boolean);
 
   // let imageMap = new Map<string, string | null>();
   // if (imageIds.length) {
   //   const { data: imagesRows, error: imagesErr } = await supabase
   //     .from("images")
-  //     // select several likely url fields the pipeline might have written
   //     .select("id, url, url, cdn_url, cdnUrl, src, file_url")
   //     .in("id", imageIds);
 
@@ -70,9 +68,8 @@ export default async function ProtectedPage() {
   //   }
   // }
 
-  // -------- fetch votes --------
+  // fetch votes (same as before)
   const captionIds = captionRows.map((c) => c.id);
-
   const { data: votes } = captionIds.length
     ? await supabase
         .from("caption_votes")
@@ -82,13 +79,12 @@ export default async function ProtectedPage() {
 
   const scoreMap = new Map<string, number>();
   const userVoteMap = new Map<string, number | null>();
-
   for (const v of votes ?? []) {
     scoreMap.set(v.caption_id, (scoreMap.get(v.caption_id) ?? 0) + v.vote_value);
     if (v.profile_id === user.id) userVoteMap.set(v.caption_id, v.vote_value);
   }
 
-  // -------- build items (ensure imageUrl is set) --------
+  // build items for CaptionPlayer
   const items = captionRows.map((c) => ({
     id: c.id,
     content: c.content,
@@ -98,18 +94,15 @@ export default async function ProtectedPage() {
     initialUserVote: userVoteMap.get(c.id) ?? null,
   }));
 
-  // // -------- fetch images --------
+  // // fetch images referenced by captions
   // const imageIds = captionRows.map(c => c.image_id).filter(Boolean);
-
   // const { data: images } = imageIds.length
   //   ? await supabase.from("images").select("id, url").in("id", imageIds)
   //   : { data: [] };
-
   // const imageMap = new Map(images?.map(i => [i.id, i.url]) ?? []);
 
-  // // -------- fetch votes --------
+  // // fetch votes
   // const captionIds = captionRows.map(c => c.id);
-
   // const { data: votes } = captionIds.length
   //   ? await supabase
   //       .from("caption_votes")
@@ -119,13 +112,12 @@ export default async function ProtectedPage() {
 
   // const scoreMap = new Map<string, number>();
   // const userVoteMap = new Map<string, number | null>();
-
   // for (const v of votes ?? []) {
   //   scoreMap.set(v.caption_id, (scoreMap.get(v.caption_id) ?? 0) + v.vote_value);
   //   if (v.profile_id === user.id) userVoteMap.set(v.caption_id, v.vote_value);
   // }
 
-  // // -------- build items --------
+  // // build items for CaptionPlayer
   // const items = captionRows.map(c => ({
   //   id: c.id,
   //   content: c.content,
@@ -137,19 +129,15 @@ export default async function ProtectedPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col">
-      {/* minimal header */}
       <Header />
+      {/* <div className="p-2 text-red-600">HEADER RENDER CHECK</div> */}
 
-      {/* full screen viewer */}
-      <main className="flex-1 flex flex-col items-center justify-center gap-8 p-6">
+      <main className="flex-1 flex items-center justify-center p-6">
         {/* @ts-ignore */}
-        <CaptionPlayer items={items} datasetKey={items.map(i => i.id).join('-')} />
-
-        {/* --- TEMP DEBUG TOOL (STEP 1 TEST) --- */}
-        <div className="bg-white border rounded-xl p-4 shadow">
-          <h2 className="font-semibold mb-2">API Test</h2>
-          <ImageUploadTester />
-        </div>
+        <CaptionPlayer 
+          items={items} 
+          datasetKey={items.map(i => i.id).join('-')}
+        />
       </main>
     </div>
   );
