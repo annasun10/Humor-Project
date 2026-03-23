@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import CaptionVoting from "./CaptionVoting"; // adjust path if needed
 import { useRouter } from "next/navigation";
 
@@ -12,10 +12,7 @@ function sleep(ms: number) {
 
 export default function UploadAndVote() {
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
-  );
+  const supabase = createSupabaseBrowserClient();
 
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");

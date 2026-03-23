@@ -47,7 +47,6 @@ export async function POST(req: Request) {
     }
 
     const profileId = authData.user.id;
-    const now = new Date().toISOString();
 
     // check for existing vote by this user on this caption
     const { data: existingVotes, error: existingErr } = await supabase
@@ -89,7 +88,7 @@ export async function POST(req: Request) {
         .from("caption_votes")
         .update({
           vote_value: vote,
-          modified_datetime_utc: now,
+          modified_by_user_id: profileId,
         })
         .eq("id", existing.id);
 
@@ -107,8 +106,8 @@ export async function POST(req: Request) {
             profile_id: profileId,
             caption_id: captionId,
             vote_value: vote,
-            created_datetime_utc: now,
-            modified_datetime_utc: null,
+            created_by_user_id: profileId,
+            modified_by_user_id: profileId,
           },
         ]);
 

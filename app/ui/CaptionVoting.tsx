@@ -1,7 +1,7 @@
 // app/ui/CaptionVoting.tsx
 'use client';
 import React, { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/auth-helpers-nextjs';
+import { createSupabaseBrowserClient } from '@/lib/supabase/client';
 import { submitVote } from '@/lib/votes';
 
 type Props = {
@@ -16,10 +16,7 @@ export default function CaptionVoting({
   initialScore = null,
   initialUserVote = null,
 }: Props) {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string
-  );
+  const supabase = createSupabaseBrowserClient();
 
   const [score, setScore] = useState<number>(initialScore ?? 0);
   const [userVote, setUserVote] = useState<number | null>(initialUserVote ?? null);
