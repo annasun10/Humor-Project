@@ -1,24 +1,36 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./page.module.css";
 
+const steps = [
+  "View one image and one caption at a time",
+  "Decide whether the caption actually matches the image",
+  "Vote with 👍 or 👎",
+  "Use arrow keys for faster rating (→ 👍, ← 👎)",
+  "Help improve humor detection models with every vote",
+];
+
 export default function HomePage() {
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <div>
-            <div className={styles.badge}>Humor Project</div>
-            <div className={styles.title}>Caption Rater</div>
-            <div className={styles.subtitle}>
-              Help us train humor AI by rating captions that match images.
-              <br />
-              Press 👍 if it fits. 👎 if it doesn’t.
-            </div>
-          </div>
+    <main className={styles.page}>
+      <div className={styles.backgroundGlowTop} />
+      <div className={styles.backgroundGlowBottom} />
+
+      <section className={styles.heroCard}>
+        <div className={styles.heroContent}>
+          <div className={styles.badge}>Humor Project</div>
+
+          <h1 className={styles.title}>Caption Rater</h1>
+
+          <p className={styles.subtitle}>
+            Help train humor AI by rating how well captions match images.
+            Vote <span className={styles.emoji}>👍</span> if it fits and{" "}
+            <span className={styles.emoji}>👎</span> if it does not.
+          </p>
 
           <div className={styles.actions}>
             <Link className={styles.primaryBtn} href="/protected">
-              Start rating
+              Start Rating
             </Link>
             <Link className={styles.secondaryBtn} href="/login">
               Login
@@ -26,28 +38,60 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className={styles.card} style={{ padding: 24 }}>
-          <h2 style={{ marginTop: 0 }}>How it works</h2>
+        <div className={styles.previewCard}>
+          <div className={styles.previewImage}>
+            <Image
+              src="/cat.jpg"
+              alt="Example"
+              fill
+              className={styles.image}
+            />
+          </div>
 
-          <ul style={{ lineHeight: 1.8 }}>
-            <li>You will see one image and one caption at a time</li>
-            <li>Decide whether the caption matches the image</li>
-            <li>Use 👍 or 👎 to vote</li>
-            <li>Arrow keys also work (→ 👍, ← 👎)</li>
-            <li>Your votes help improve humor detection models</li>
-          </ul>
+          <div className={styles.previewCaptionBox}>
+            <p className={styles.previewCaption}>
+              “When you realize the group project is due tonight.”
+            </p>
 
-          <div className={styles.actions} style={{ marginTop: 24 }}>
-            <Link className={styles.primaryBtn} href="/protected">
-              Begin
-            </Link>
+            <div className={styles.previewVotes}>
+              <button className={styles.voteBtn} type="button" aria-label="Thumbs down">
+                👎
+              </button>
+              <button className={styles.voteBtn} type="button" aria-label="Thumbs up">
+                👍
+              </button>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className={styles.footnote}>
-          You must be signed in to vote. Authentication is handled securely via Google OAuth.
+      <section className={styles.infoGrid}>
+        <div className={styles.infoCard}>
+          <h2 className={styles.cardTitle}>How it works</h2>
+          <ul className={styles.stepList}>
+            {steps.map((step) => (
+              <li key={step} className={styles.stepItem}>
+                <span className={styles.stepDot} />
+                <span>{step}</span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-    </div>
+
+        <div className={styles.infoCard}>
+          <h2 className={styles.cardTitle}>Why it matters</h2>
+          <p className={styles.cardText}>
+            Your feedback helps us understand what makes captions feel accurate,
+            funny, or off-target. That data can be used to improve future humor
+            and captioning systems.
+          </p>
+
+          <div className={styles.notice}>
+            You must be signed in to vote. Authentication is handled securely
+            through Google OAuth.
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
